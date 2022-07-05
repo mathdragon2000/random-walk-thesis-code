@@ -1,0 +1,146 @@
+from array import *
+import numpy as np
+import matplotlib.pyplot as plt
+import scipy.special
+import random
+import math
+import time
+
+epsilon = int(input("Enter n such that epsilon = 10^(-n)"))
+numtrials = int(input("Number of trials?"))
+indices = int(input("How many ladder indices should I simulate the algorithm out to?"))
+
+start = time.time()
+
+ladderprobabilityarray = []
+ladderprobabilitysumarray = []
+ladderprobabilitysum = 0.0
+rise = 0.0
+run = 0.0
+firsttime = True
+firstcross = True
+evercrossed = False
+stop = False
+
+ladderindexarray = []
+ladderindextotal = 0.0
+crosscount = 0
+
+ladderprobabilityproduct = 1.0
+pointprobability = 1.0
+runningprobability = 1.0
+
+stoppingpointtotal = 0
+stopcount = 0
+maxslope = 0.0
+maxslopearray = []
+
+i = 0
+while i < 2000:
+    ladderprobabilitysumarray.append(1 - (math.comb(2 * i + 2, i + 1))/(4 ** (i + 1)))
+    i += 1
+
+k = 0
+ladderprobabilityarray.append(0.5)
+while k < 1998:
+  ladderprobabilityarray.append(ladderprobabilitysumarray[k + 1] - ladderprobabilitysumarray[k])
+  k += 1
+
+j = 0
+while j < numtrials:
+  ##for each of the specified number j of trials, repeat the algorithm all over again to get a new max
+  ##slope to add to the data list that goes into the CDF
+  #print("New trial")
+  maxslope = 0.0
+  stop = False
+  ladderprobabilityproduct = 1
+  pointprobability = 1
+  rise = 0
+  run = 0
+  firstcross = True
+  evercrossed = False
+  k = 0
+  while k < indices: ##run through each of the ladder indices until the specified stopping point
+      rand = random.random()
+      #print("rand = " + str(rand))
+      firsttime = True
+      l = 1
+      while l < 1000:
+        rules = [rand > ladderprobabilitysumarray[l - 1], rand < ladderprobabilitysumarray[l],
+          stop == False]
+        if all(rules):
+          #print("rules are met: l = " + str(l))
+          firsttime = False
+          rise += 1
+          run += 2 * l + 1
+          #print("New coordinates: (" + str(run) + ", " + str(rise) + ")")
+          #print("Slope up to this point is " + str(rise/run))
+          ladderprobabilityproduct *= ladderprobabilityarray[l]
+          #print("Probability of having these exact ladder indices up to this point is " +
+          str(ladderprobabilityproduct))
+          pointprobability = math.exp(-2 * maxslope * (maxslope * run - rise))
+          #print("pointprobability is " + str(pointprobability))
+          runningprobability = ladderprobabilityproduct * pointprobability
+          #print("runningprobability is " + str(runningprobability))
+          #print()
+        elif rand < 0.5 and firsttime == True and stop == False:
+          #print("rules are met: l = 0")
+          firsttime = False
+          rise += 1
+          run += 1
+          #print("New coordinates: (" + str(run) + ", " + str(rise) + ")")
+          #print("Slope up to this point is " + str(rise/run))
+          ladderprobabilityproduct *= 0.5
+          #print("Probability of having these exact ladder indices up to this point is " +
+          str(ladderprobabilityproduct))
+          pointprobability = math.exp(-2 * maxslope * (maxslope * run - rise))
+          runningprobability = ladderprobabilityproduct * pointprobability
+          #print("runningprobability is " + str(runningprobability))
+          #print()
+        l += 1
+      if rise > maxslope * run and stop == False:
+          maxslope = rise/run
+          #print("New max slope: " + str(maxslope))
+          ladderindexarray.append(run)
+          crosscount += 1
+          firstcross = False
+          ladderindextotal += ladderindexarray[j]
+          evercrossed = True
+      elif rise < maxslope * run and runningprobability < math.pow(10, -epsilon) and stop == False:
+          stop = True
+          stoppingpointtotal += rise
+          stopcount += 1
+          #print("Stop: crossing probability is less than specified epsilon threshold.")
+      k += 1
+  maxslopearray.append(maxslope)
+  j += 1
+  #print()
+
+ladderindexaverage = 0
+ladderindexaverage = stoppingpointtotal/stopcount
+print("stopcount = " + str(stopcount))
+print("The mean number of ladder indices required for the algorithm to terminate naturally is: "
++ str(ladderindexaverage))
+
+## to provide output in a Mathematica-friendly format
+uniquearray = []
+def unique(list1):
+    list_set = set(list1)
+    unique_list = (list(list_set))
+    for x in unique_list:
+        uniquearray.append(x)
+
+unique(maxslopearray)
+
+def count(list, x):
+    count = 0
+    for ele in list:
+        if(ele == x):
+            count += 1
+    return count
+    
+end = time.time()
+print(f"Runtime of the program is {end - start} seconds")
+
+for i in uniquearray:
+    print("repeat[" + str(i) + ", " + str(count(maxslopearray, i)) + "], ")

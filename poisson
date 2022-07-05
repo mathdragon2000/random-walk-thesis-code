@@ -1,0 +1,91 @@
+from array import *
+import numpy as np
+import matplotlib.pyplot as plt
+import scipy.special
+import random
+import math
+import time
+
+rows = int(input("How many rows (repetitions)?"))
+columns = int(input("How many columns (the index i to simulate out to)?"))
+
+start = time.time()
+
+matrix = []
+
+for i in range(rows):
+    gamma = 0.0
+    for j in range(columns):
+        gamma += np.random.exponential(1, 1)
+        ##print(gamma)
+        matrix.append(float(gamma))
+
+harmonicmatrix = matrix
+    
+for i in range(len(harmonicmatrix)):
+    k = 0
+    if harmonicmatrix[i] <= 10:
+        j = 0
+        while j < harmonicmatrix[i]:
+            k += 1
+            j += 1/k
+        harmonicmatrix[i] = k
+        
+    ## note that the harmonic numbers grow rapidly beyond this point,
+    ## so computation becomes vastly more complicated, and so an approximation
+    ## by the Euler-Mascheroni constant is desired here.
+    
+    elif harmonicmatrix[i] > 10:
+        k = ceil(np.exp(harmonicmatrix[i] - np.euler_gamma))
+    harmonicmatrix[i] = k
+
+def slopesimulator(x):
+    binomrand = random.random()
+    a = 0
+    while a < x:
+        if binomrand < scipy.special.binom(x, a + 1) and binomrand >= scipy.special.binom(x, a):
+            a += 1
+
+slopearray = []
+
+n = 0.0
+for i in range(rows * columns):
+    slopearray.append(slopesimulator(harmonicmatrix[i]))
+
+slopearray = np.resize(slopearray, (rows, columns))
+
+maxslopearray = []
+
+for i in range(rows):
+    max = -1.0
+    for j in range(columns):
+        if slopearray[i][j] > max:
+            max = slopearray[i][j]
+    maxslopearray.append(max)
+
+print("maxslopearray is:")
+print(maxslopearray)
+
+## to provide output in a Mathematica-friendly format
+uniquearray = []
+
+def unique(list1):
+    list_set = set(list1)
+    unique_list = (list(list_set))
+    for x in unique_list:
+        uniquearray.append(x)
+
+unique(maxslopearray)
+
+def count(list, x):
+    count = 0
+    for ele in list:
+        if(ele == x):
+            count += 1
+    return count
+    
+end = time.time()
+print(f"Runtime of the program is {end - start} seconds")
+
+for i in uniquearray:
+    print("repeat[" + str(i) + ", " + str(count(maxslopearray, i)) + "], ")

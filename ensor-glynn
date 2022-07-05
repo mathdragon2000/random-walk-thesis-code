@@ -1,0 +1,98 @@
+from array import *
+import numpy as np
+import random
+
+u = float(input("Input the value of u (downward drift) (0 < u < 1)"))
+inputcount = int(input("How many runs of the simulation?"))
+##repeats the process this many times
+
+probabilityarray = []
+total = 0.0
+p = 0.0
+t = 0.0
+k = 0
+stop = False
+while k < 100000 and stop == False:
+    while(np.exp(t * (1 - u)) + np.exp(t * (-1 - u)) <= 2.0):
+        t = k/100000.0
+        k += 1
+    if(np.exp(t * (1 - u)) + np.exp(t * (-1 - u)) > 2.0):
+        stop = True
+# fixes the value of theta as necessary for sensitivity analysis
+print("theta = " + str(t))
+
+mavemaxarray = []
+uniquearray = []
+
+start = time.time()
+
+repeat = 0
+while repeat < inputcount:
+    mavearray = []
+    rand = random.random()
+    eps = -np.log(rand)
+    ##print("eps = " + str(eps))
+    total = 0.0
+    runningarray = []
+    ladderheightarray = []
+    while total <= eps/t:
+        runningarray.append(total)
+        ##print("Current walk position is " + str(total))
+        r = random.random()
+        if r <= np.exp(t * (1 - u)) * 0.5:
+            total += 1 - u
+        elif r > np.exp(t * (1 - u)) * 0.5:
+            total -= 1 + u
+    i = 0
+    while i < len(runningarray):
+        potentialmax = True
+        j = 0
+        while j < i:
+            ##if runningarray[j] < runningarray[i] and runningarray[i] > 0 and potentialmax == True:
+            if runningarray[j] >= runningarray[i] and potentialmax == True:
+                potentialmax = False
+            j += 1
+        if potentialmax == True:
+            ladderheightarray.append(runningarray[i])
+            if i != 0:
+                mavearray.append(runningarray[i]/i)
+            elif i == 0:
+                mavearray.append(0)
+        i += 1
+
+    maximum = 0.0
+    y = 0
+    while y < len(ladderheightarray):
+        if ladderheightarray[y] > maximum:
+            maximum = ladderheightarray[y]
+        y += 1
+    z = 0
+    mavemax = 0.0
+    while z < len(mavearray):
+        if mavearray[z] > mavemax:
+            mavemax = mavearray[z]
+        z += 1
+    mavemax += u
+    mavemaxarray.append(mavemax)
+    repeat += 1
+
+def unique(list1):
+    list_set = set(list1)
+    unique_list = (list(list_set))
+    for x in unique_list:
+        uniquearray.append(x)
+
+unique(mavemaxarray)
+
+def count(list, x):
+    count = 0
+    for ele in list:
+        if(ele == x):
+            count += 1
+    return count
+
+end = time.time()
+print(f"Runtime of the program is {end - start} seconds")
+
+for i in uniquearray:
+    print("repeat[" + str(i) + ", " + str(count(mavemaxarray, i)) + "], ", end = '')

@@ -1,0 +1,61 @@
+from array import *
+import numpy as np
+import random
+import time
+
+desiredavg = float(input("Desired average x > 0:"))
+##running average after which we stop
+
+total = 0
+increments = 0
+
+#averagearray records all of the average slopes
+averagearray = []
+
+#newlowarray records all of the new lows of the running averages
+newlowarray = []
+
+start = time.time()
+
+rand = random.uniform(0, 1)
+if rand < 0.5:
+  total -= 1
+  increments += 1
+  print("Down")
+  print("Running average is " + str(total/increments))
+  newlowarray.append(total/increments)
+elif rand >= 0.5:
+  total += 1
+  increments += 1
+  print("Up")
+  print("Running average is " + str(total/increments))
+  newlowarray.append(total/increments)
+
+if increments >= 1:
+  while total/increments >= desiredavg:
+    rand = random.uniform(0, 1)
+    if rand < 0.5:
+      total -= 1
+      increments += 1
+      print("Down")
+      print("Running average is " + str(total/increments))
+    elif rand >= 0.5:
+      total += 1
+      increments += 1
+      print("Up")
+      print("Running average is " + str(total/increments))
+    i = 0
+    lowest = True
+    while i < len(newlowarray):
+      if newlowarray[i] <= total/increments:
+        lowest = False
+      i += 1
+    if lowest == True:
+      newlowarray.append(total/increments)
+  
+print("Descending ladder indices of the sequence of averages, which has length " 
++ str(len(newlowarray)) + ": " + str(newlowarray))
+print("Number of increments needed to get below the inputted average is " + str(increments))
+
+end = time.time()
+print(f"Runtime of the program is {end - start} seconds")

@@ -1,0 +1,44 @@
+from array import *
+from itertools import product
+import numpy as np
+import random
+import time
+
+total = 0
+increments = 0
+
+runs = int(input("Number of runs?"))
+start = time.time()
+
+dyckarray = []
+newlowlengtharray = []
+
+for i in range(runs):
+  newlowarray = []
+  #print("New walk with i.i.d simple symmetric increments")
+  total = 0
+  increments = 0
+  while total >= 0:
+    increase = random.randint(0, 1) * 2 - 1
+    #print("The increment was " + str(increase))
+    total += increase
+    increments += 1
+    if increments >= 1:
+      j = 0
+      lowest = True
+      while j < len(newlowarray):
+        if newlowarray[j] <= total/increments:
+          lowest = False
+        j += 1
+      if lowest == True and total != increments and total >= 0:
+        newlowarray.append(total/increments)
+  #print("Descending ladder indices of the sequence of averages: " + str(newlowarray) 
+  + " with length " + str(len(newlowarray)))
+  newlowlengtharray.append(len(newlowarray))
+  #print()
+print("List of numbers of illuminated points for ``Dyck'' paths of specified length: " 
++ str(newlowlengtharray))
+print("Mean number of illuminated points: " + str(np.mean(newlowlengtharray)))
+
+end = time.time()
+print(f"Runtime of the program is {end - start} seconds")

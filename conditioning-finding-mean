@@ -1,0 +1,69 @@
+from array import *
+from itertools import product
+import numpy as np
+import random
+import time
+
+total = 0
+increments = 0
+
+count = int(input("How many times should I run this program?"))
+runs = int(input("Number of runs?"))
+desired = int(input("Condition on how many increments to go negative?"))
+start = time.time()
+
+meanarray = []
+normalizedarray = []
+
+k = 0
+while k < count:
+    newlowlengtharray = []
+    i = 0
+    while i < runs:
+      newlowarray = []
+      #print("New walk with i.i.d 1/-1 increments!")
+      total = 0
+      increments = 0
+      while total >= 0 and increments < desired + 1:
+        increase = random.randint(0, 1) * 2 - 1
+        #print("The increment was " + str(increase))
+        total += increase
+        increments += 1
+        if increments >= 1:
+          j = 0
+          lowest = True
+          while j < len(newlowarray):
+            if newlowarray[j] <= total/increments:
+              lowest = False
+            j += 1
+          if lowest == True and total != increments and total >= 0:
+            newlowarray.append(total/increments)
+      #print("Descending ladder indices of the sequence of averages: " + str(newlowarray)
+      + " with length " + str(len(newlowarray)))
+      #print(increments)
+      if increments == desired:
+        newlowlengtharray.append(len(newlowarray))
+        i += 1
+        #print("i = " + str(i))
+      #print()
+    #print("List of numbers of illuminated points for ``Dyck'' paths of specified length: "
+    + str(newlowlengtharray))
+    #print("Mean number of illuminated points: " + str(np.mean(newlowlengtharray)))
+    meanarray.append(np.mean(newlowlengtharray))
+    k += 1
+    print("End of one run: next up is j = " + str(k))
+
+m = 0
+while m < len(meanarray):
+    normalizedarray.append(meanarray[m]/(desired ** 0.5))
+    m += 1
+
+totalmean = np.mean(meanarray)
+print("All means are: " + str(meanarray))
+print("The total mean number of illuminated points over " + str(count) + " runs of the program is: "
++ str(totalmean))
+print("After normalizing by the square root of number of increments before going negative, we get "
+    + str(normalizedarray) + ", and the normalized mean is " + str(np.mean(normalizedarray)))
+
+end = time.time()
+print(f"Runtime of the program is {end - start} seconds")

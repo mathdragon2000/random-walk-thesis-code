@@ -1,0 +1,67 @@
+from array import *
+import numpy as np
+import random
+import time
+
+limit = int(input("Number of increments in each run?"))
+inputcount = int(input("How many runs of the simulation?"))
+##repeats the process this many times
+
+total = 0
+
+#mavemaxarray records all of the maximum average slopes
+maxavearray = []
+
+#uniquearray ensures that they're all unique for mathematica data input purposes
+uniquearray = []
+
+start = time.time()
+
+repeat = 0
+while repeat < inputcount:
+    count = 0
+    ## print("epsilon = " + str(eps))
+    ## above is to verify that epsilon is actually a standard exponential variable
+    runningarray = []
+    total = 0.0
+    maximum = 0.0
+    while count < limit:
+        eps = np.random.exponential()
+        increment = eps - 1
+        ## print("increment is: " + str(increment))
+        total += increment
+        ## print("total is: " + str(total))
+        count += 1
+        average = total/count
+        ## print("average is: " + str(average))
+        runningarray.append(average)
+        ## print("runningarray is " + str(runningarray))
+        j = 0
+        while j < len(runningarray):
+            if runningarray[j] > maximum:
+                maximum = runningarray[j] 
+            j += 1
+    ## print("maximum is " + str(maximum))
+    maxavearray.append(maximum)
+    repeat += 1
+
+def unique(list1):
+    list_set = set(list1)
+    unique_list = (list(list_set))
+    for x in unique_list:
+        uniquearray.append(x)
+
+unique(maxavearray)
+
+def count(list, x):
+    count = 0
+    for ele in list:
+        if(ele == x):
+            count += 1
+    return count
+
+end = time.time()
+print(f"Runtime of the program is {end - start} seconds")
+
+for i in uniquearray:
+    print("repeat[" + str(i) + ", " + str(count(maxavearray, i)) + "], ", end = '')
